@@ -1,18 +1,36 @@
-# 執行與知識累積流程
+# 桌面控制任務流程
 
-![執行與知識累積流程圖](assets/workflow.svg)
+```mermaid
+sequenceDiagram
+    actor User as 使用者
+    participant UI as Web UI
+    participant Server
+    participant Agent as Windows Agent
+    participant Worker as Python Worker
+    participant Desktop as 桌面環境
 
-## 任務執行
+    User->>UI: 選擇裝置與控制任務
+    UI->>Server: 驗證身份、裝置權限與任務政策
+    Server-->>UI: 回傳允許操作的狀態／授權資料
+    UI->>Agent: 透過本機 API 發出控制請求
+    Agent->>Server: 確認／續期任務授權
+    Server-->>Agent: 回覆允許狀態與規則版本
+    Agent->>Desktop: 本機環境檢查與桌面操作
+    opt 需要擷取或分析
+        Agent->>Worker: 呼叫 OCR／影像／分析工具
+        Worker-->>Agent: 回傳分析結果
+    end
+    Agent->>Server: 回報任務狀態、事件與結果
+    Server-->>UI: 更新任務狀態
+    UI-->>User: 顯示結果與狀態
+```
 
-Web UI 提出操作請求，Server 負責身份、授權與任務政策檢查；本機 Agent 接收允許的執行工作，必要時調用 Worker 做訊號或影像分析，最後將狀態與觀測結果回報 Server。
+## 執行責任
 
-## 觀測轉知識
+1. Web UI 負責人機操作與狀態呈現。
+2. Server 檢查帳號、裝置和任務政策，並維護授權與規則狀態。
+3. Agent 在受控電腦執行操作，管理工作階段並負責啟停與資源清理。
+4. Worker 只在 Agent 呼叫時提供分析工具，回傳結果後由 Agent 繼續控制任務。
+5. 執行觀測轉成標準事件；需判讀的未知結果進入確認流程，確認後再整理為版本化知識。
 
-擷取資料先轉成標準事件格式，再由分析流程辨識已知情況。未知或低信心結果進入人工確認；確認後整理為有版本的知識／規則，供後續流程重用。原始觀測、推論結果與已確認知識保持可區分，避免把模型推論直接當成事實。
-
-## 設計重點
-
-- Server 是授權與平台狀態的權威來源。
-- Agent/Worker 的責任是執行與分析，不取代 Server 的裁決。
-- 分析結果可追溯來源及版本，未知案例保留人工確認步驟。
-- 新目標透過薄型模組加入，不重複建置平台共用底盤。
+English: The Web UI requests a task, the Server authorizes it, the local Agent operates the desktop, and the Worker returns analysis results.
