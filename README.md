@@ -1,31 +1,51 @@
 # 桌面端控制與自動化平台
 
-平台集中管理操作授權，由安裝在受控電腦上的 Agent 執行桌面操作；影像與 OCR 工作交由 Worker 處理。
-
-## 系統架構
-
-```mermaid
-flowchart TB
-    UI[Web UI] --> Server[Server]
-    UI --> Agent[Windows Agent]
-    Server <-->|授權與狀態| Agent
-    Agent --> Desktop[受控桌面]
-    Agent --> Worker[Python Worker]
-```
-
-- **Web UI｜Vue 3** — 操作入口，呈現裝置與任務狀態。
-- **Server｜Java 21、Spring Boot 3.3.1、PostgreSQL** — 管理身份、權限、裝置政策與任務狀態。
-- **Windows Agent｜Java** — 在受控電腦執行桌面操作，管理任務生命週期與資源清理。
-- **Python Worker｜Python、FastAPI、OpenCV、OCR** — 提供 Agent 按需呼叫的影像擷取與分析工具。
+將平台授權與本機桌面執行分開：Server 管理身份與任務政策，Windows Agent 在受控電腦執行操作，Worker 提供專用分析工具。
 
 ## 任務流程
 
-1. 使用者選擇裝置與任務。
-2. Server 檢查身份、裝置權限與任務政策。
-3. Agent 確認授權後，在本機檢查環境並執行桌面操作。
-4. 有分析需求時，Agent 呼叫 Worker，取得影像或文字分析結果。
-5. Agent 回報狀態與結果；Server 更新平台狀態供 Web UI 呈現。
+```mermaid
+flowchart TB
+    A[選擇裝置與任務] --> B[Server 檢查身份與政策]
+    B --> C[Agent 確認授權並檢查本機環境]
+    C --> D[Agent 執行桌面操作]
+    D --> E{需要影像或文字分析}
+    E -->|需要| F[Worker 執行 OCR 或影像分析]
+    E -->|不需要| G[Agent 整理執行結果]
+    F --> G
+    G --> H[Agent 回報，Server 更新狀態]
+```
 
-## 架構邊界
+## 架構心智圖
 
-Server 是平台授權與狀態的依據；Agent 負責本機執行、工作階段與清理；Worker 只提供分析工具，不負責整體任務控制。
+```mermaid
+mindmap
+  root((桌面控制平台))
+    操作入口
+      Web UI
+      裝置與任務狀態
+    平台控制
+      Server
+      身份與授權
+      裝置政策與任務狀態
+    本機執行
+      Windows Agent
+      桌面操作
+      任務生命週期與清理
+    分析工具
+      Python Worker
+      OCR 與影像處理
+```
+
+## 元件技術
+
+- **Web UI：** Vue 3
+- **Server：** Java 21、Spring Boot 3.3.1、PostgreSQL
+- **Windows Agent：** Java
+- **Python Worker：** Python、FastAPI、OpenCV、OCR
+
+## 設計考量
+
+- **授權與執行分離：** Server 維持平台政策與狀態，Agent 僅在本機執行已授權任務。
+- **分析與控制分離：** Worker 回傳影像或文字分析結果，Agent 保有任務啟停、生命週期與資源清理責任。
+- **適用情境：** 需要平台統一控管，又必須在使用者電腦執行桌面操作的工作。
