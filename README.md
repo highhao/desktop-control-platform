@@ -10,7 +10,7 @@
 
 Server 管理平台狀態；Web UI 提供操作入口；Agent 負責本機執行；Worker 提供分析工具；目標模組承載專屬設定、規則與知識。
 
-## 詳細文件
+## 架構與流程
 
 - [系統架構與元件分層](docs/architecture.md)
 - [執行與知識流程](docs/workflow.md)
@@ -19,4 +19,4 @@ Server 管理平台狀態；Web UI 提供操作入口；Agent 負責本機執行
 
 為 Server、Agent 與 Worker 加入資料契約相容性檢查、明確的任務狀態轉換、回報冪等處理及跨元件追蹤。
 
-English: A multi-language automation and signal-analysis platform with central services, a local agent, and analysis workers.
+**English:** A multi-language automation and signal-analysis platform with central services, a local agent, and analysis workers.
