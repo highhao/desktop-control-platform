@@ -32,3 +32,7 @@ flowchart TB
 ## 程式分層
 
 [查看元件職責與程式分層](architecture-demo.md)
+
+## 架構 demo
+
+[查看可執行的分層示範](demo/)
