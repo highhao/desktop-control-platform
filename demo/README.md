@@ -37,6 +37,6 @@ npm install
 npm run dev
 ```
 
-開啟 Vite 顯示的本機網址，點擊「執行示範任務」。Server 的授權測試可在 `server` 目錄執行 `mvn test`。
+開啟 Vite 顯示的本機網址，可選擇有授權或無授權的虛構使用者，觀察任務啟動與拒絕的結果。Server 的授權測試可在 `server` 目錄執行 `mvn test`。
 
 僅限本機展示；全部使用虛構資料，請勿用於真實授權或正式環境。
