@@ -2,22 +2,6 @@
 
 以平台授權、本機執行與遊戲能力的分工組織程式。
 
-## 元件關係
-
-```mermaid
-flowchart TB
-    User[使用者] --> UI[Vue Web UI]
-    UI -->|帳號及授權| Server[Java Server]
-    UI -->|本機控制| Agent[Windows Java Agent]
-    Agent -->|確認授權與回報狀態| Server
-    Agent -->|按需呼叫| Worker[Python Worker]
-```
-
-- **Vue Web UI：**畫面、狀態與操作入口；將平台請求和本機操作分別交給對應 API。
-- **Java Server：**帳號、裝置、權限及授權狀態；管理平台資料與政策。
-- **Windows Agent：**使用者電腦上的本機 API、任務生命週期、資源協調與清理。
-- **Python Worker：**遊戲相關處理、影像與 OCR 等能力；由 Agent 按需呼叫，不負責平台授權或整體任務生命週期。
-
 ## 元件內部分層
 
 ```text
