@@ -8,6 +8,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Locale;
+import java.util.UUID;
 
 /** 簡化的本機 Agent：不執行桌面控制，不包含正式授權機制。 */
 public class Agent {
@@ -30,11 +32,14 @@ public class Agent {
         try {
             HttpRequest auth = HttpRequest.newBuilder(URI.create("http://127.0.0.1:18081/api/demo/authorization?user=" + user + "&device=demo-device")).timeout(Duration.ofSeconds(3)).GET().build();
             HttpResponse<String> decision = CLIENT.send(auth, HttpResponse.BodyHandlers.ofString());
-            if (decision.statusCode() != 200 || !"ALLOW".equals(decision.body())) { respond(exchange, 403, "authorization denied"); return; }
+            if (decision.statusCode() == 403) { respond(exchange, 403, "authorization denied"); return; }
+            if (decision.statusCode() != 200 || !"ALLOW".equals(decision.body())) { respond(exchange, 503, "authorization service unavailable"); return; }
             HttpRequest work = HttpRequest.newBuilder(URI.create("http://127.0.0.1:18083/analyze?task=" + task)).timeout(Duration.ofSeconds(3)).POST(HttpRequest.BodyPublishers.noBody()).build();
             HttpResponse<String> result = CLIENT.send(work, HttpResponse.BodyHandlers.ofString());
             if (result.statusCode() != 200) { respond(exchange, 502, "worker unavailable"); return; }
-            respond(exchange, 200, "Agent：授權通過 → 任務啟動 → Worker：" + result.body());
+            String runId = "DEMO-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
+            exchange.getResponseHeaders().set("X-Demo-Run-Id", runId);
+            respond(exchange, 200, result.body());
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt(); respond(exchange, 503, "request interrupted");
         } catch (IOException ex) { respond(exchange, 503, "service unavailable"); }
