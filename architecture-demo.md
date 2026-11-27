@@ -29,28 +29,11 @@ Python Worker api → application → domain / infrastructure / games
 
 目錄依目前專案結構歸納，並非所有用例都經過完全相同的路徑。`games` 承載遊戲相關能力；Agent 管理本機 session 與清理，Worker 提供被呼叫的能力。
 
-## 簡化呼叫示意
+## 程式結構對照
 
-```javascript
-// Vue：透過 API 層送出使用者操作
-async function startTask(task) {
-  return agentApi.startTask(task)
-}
-```
+- Web UI 的 `src/api` 包含平台 API 與本機 Agent API，畫面及狀態相關程式分布於 `views`、`components`、`stores` 等目錄。
+- Server 的裝置模組包含 API 與 application 目錄，可看到 Controller 與應用服務分開。
+- Agent 的 runtime 包含 `api`、`application`、`domain`、`infrastructure`；應用層包含任務 session 與 Worker 更新相關服務。
+- Worker 以 FastAPI 提供路由，並有 `application`、`domain`、`infrastructure` 與 `games` 等目錄；不同遊戲與執行路徑的成熟度不同。
 
-```java
-// Agent：協調任務生命週期與 Worker 呼叫
-void startTask(Task task) {
-    authorize(task);
-    session.start(task);
-    worker.analyze(task);
-}
-```
-
-```python
-# Worker：提供單一分析能力
-def analyze(image):
-    return recognize(preprocess(image))
-```
-
-以上是說明責任分工的概念片段，並非原始程式碼或可執行範例；實際授權與執行流程依任務路徑而異。
+以上是已檢查的目錄與類別責任，並不表示所有功能均已完成或全部遵循同一條呼叫路徑。
