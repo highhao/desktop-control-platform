@@ -1,21 +1,36 @@
 # 遊戲操作平台｜元件與程式分層
 
-以平台授權、本機執行與遊戲能力的分工組織程式。
+平台把使用者操作、授權、本機任務及遊戲工具分開，讓不同元件各自處理所需的工作。
 
-## 元件內部分層
+## 一次任務如何協作
 
-```text
-Web UI        views / components → stores / composables → api
-Java Server   API → 應用服務 → 領域與資料存取（依領域模組組織）
-Windows Agent runtime/api → application → domain / infrastructure
-Python Worker api → application → domain / infrastructure / games
-```
+1. 使用者在 **Web UI** 登入，選擇裝置與任務。
+2. **Java Server** 管理帳號、裝置與使用資格；Web UI 取得授權後，向本機 Agent 發出操作。
+3. **Windows Agent** 啟動任務前再次向 Server 確認授權，並管理本機 session 的啟停與清理。
+4. 任務需要影像或文字辨識等能力時，Agent 呼叫 **Python Worker**；Worker 回傳處理結果。
 
-目錄依目前專案結構歸納，並非所有用例都經過完全相同的路徑。`games` 承載遊戲相關能力；Agent 管理本機 session 與清理，Worker 提供被呼叫的能力。
+> 這是任務協作的概觀；實際操作會依遊戲與任務類型使用不同路徑。
 
-## 程式結構對照
+## 各元件的內部分工
 
-- Web UI 的 `src/api` 包含平台 API 與本機 Agent API，畫面及狀態相關程式分布於 `views`、`components`、`stores` 等目錄。
-- Server 的裝置模組包含 API 與 application 目錄，可看到 Controller 與應用服務分開。
-- Agent 的 runtime 包含 `api`、`application`、`domain`、`infrastructure`；應用層包含任務 session 與 Worker 更新相關服務。
-- Worker 以 FastAPI 提供路由，並有 `application`、`domain`、`infrastructure` 與 `games` 等目錄；不同遊戲與執行路徑的成熟度不同。
+### Web UI｜Vue
+
+畫面與元件提供使用者操作；狀態與共用操作由 stores／composables 整理；API 模組分別連接平台 Server 與本機 Agent。能連到本機 Agent 不代表帳號已取得平台授權。
+
+### 平台 Server｜Java
+
+依帳號、裝置與授權等領域拆分模組。以裝置模組為例：Controller 接收裝置請求，應用服務處理註冊與查詢，再由領域及資料存取程式處理相關資料。
+
+### Windows Agent｜Java
+
+本機 API 接收操作；應用服務管理任務 session；領域與基礎設施程式負責授權查詢、執行環境及本機資源。Agent 啟動任務前再次確認授權，避免只依賴畫面端的判斷。
+
+### Python Worker
+
+FastAPI 路由接收 Agent 的請求，交由應用服務及遊戲模組處理；影像、OCR 與其他工具能力依需求使用。Worker 提供任務所需能力，整體本機 session 的生命週期仍由 Agent 管理。
+
+## 設計重點
+
+- **授權集中：**Server 管理帳號與裝置資格；Agent 在執行前再次確認。
+- **執行責任明確：**Agent 管理本機任務與資源，Worker 提供遊戲與辨識能力。
+- **分開演進：**平台共用的管理功能與遊戲相關處理分屬不同元件，便於各自維護。
