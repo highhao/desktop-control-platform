@@ -20,15 +20,18 @@ public class Agent {
     }
     private static void startTask(HttpExchange exchange) throws IOException {
         if (!"POST".equals(exchange.getRequestMethod())) { respond(exchange, 405, "method not allowed"); return; }
-        String user = exchange.getRequestURI().getRawQuery();
-        if (!"demo-user".equals(user) && !"other-user".equals(user)) {
-            respond(exchange, 400, "invalid demo user"); return;
+        String query = exchange.getRequestURI().getRawQuery();
+        if (query == null || !query.matches("user=(demo-user|other-user)&task=(image|text)")) {
+            respond(exchange, 400, "invalid demo request"); return;
         }
+        String[] fields = query.split("&");
+        String user = fields[0].substring("user=".length());
+        String task = fields[1].substring("task=".length());
         try {
             HttpRequest auth = HttpRequest.newBuilder(URI.create("http://127.0.0.1:18081/api/demo/authorization?user=" + user + "&device=demo-device")).timeout(Duration.ofSeconds(3)).GET().build();
             HttpResponse<String> decision = CLIENT.send(auth, HttpResponse.BodyHandlers.ofString());
             if (decision.statusCode() != 200 || !"ALLOW".equals(decision.body())) { respond(exchange, 403, "authorization denied"); return; }
-            HttpRequest work = HttpRequest.newBuilder(URI.create("http://127.0.0.1:18083/analyze")).timeout(Duration.ofSeconds(3)).POST(HttpRequest.BodyPublishers.noBody()).build();
+            HttpRequest work = HttpRequest.newBuilder(URI.create("http://127.0.0.1:18083/analyze?task=" + task)).timeout(Duration.ofSeconds(3)).POST(HttpRequest.BodyPublishers.noBody()).build();
             HttpResponse<String> result = CLIENT.send(work, HttpResponse.BodyHandlers.ofString());
             if (result.statusCode() != 200) { respond(exchange, 502, "worker unavailable"); return; }
             respond(exchange, 200, "Agent：授權通過 → 任務啟動 → Worker：" + result.body());
