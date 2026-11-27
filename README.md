@@ -30,3 +30,7 @@ flowchart TB
 - **遊戲能力拆分：**將遊戲相關處理與分析工具放在 Worker，讓平台共用功能與遊戲模組各自演進。
 
 **技術：**Vue 3、Java 21、Spring Boot、PostgreSQL、Python、FastAPI、OpenCV、OCR。
+
+## 分層範例
+
+[查看元件職責與程式分層示意](architecture-demo.md)
