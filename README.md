@@ -7,21 +7,19 @@
 ```mermaid
 flowchart TB
     User[使用者] --> UI
-    subgraph Platform["平台端"]
-        UI[Web UI<br/>操作介面與狀態]
-        Server[Java Server<br/>帳號、裝置與授權]
-        UI -->|登入與授權| Server
-    end
     subgraph Client["使用者的 Windows 電腦"]
-        Agent[Windows Agent<br/>本機任務與資源管理]
-        Worker[Python Worker<br/>遊戲能力與分析工具]
+        UI[瀏覽器 Web UI]
+        Agent[Windows Agent]
+        Worker[Python Worker]
+        UI -->|本機操作命令| Agent
         Agent -->|按需呼叫| Worker
     end
-    UI -->|本機操作命令| Agent
+    Server[平台端 Java Server<br/>帳號、裝置與授權]
+    UI -->|登入與授權| Server
     Agent -->|授權確認與狀態回報| Server
 ```
 
-使用者登入並選擇裝置及任務；Server 管理帳號、功能資格與授權有效期；Agent 在本機管理任務啟停及資源清理，並按需呼叫 Worker。Worker 提供影像、OCR 與遊戲相關工具能力。
+使用者登入並選擇裝置及任務；Web UI 向 Server 取得授權後，向本機 Agent 發出操作命令。Agent 管理任務啟停與資源清理，並按需呼叫 Worker 的影像、OCR 與遊戲相關能力，再回報狀態。
 
 ## 設計考量
 
