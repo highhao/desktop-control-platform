@@ -1,6 +1,6 @@
-# 遊戲操作平台｜元件與分層範例
+# 遊戲操作平台｜元件與程式分層
 
-依現有程式目錄及元件職責整理，範例名稱與資料均經簡化，用於展示設計邊界。
+以平台授權、本機執行與遊戲能力的分工組織程式。
 
 ## 元件關係
 
@@ -18,7 +18,7 @@ flowchart TB
 - **Windows Agent：**使用者電腦上的本機 API、任務生命週期、資源協調與清理。
 - **Python Worker：**遊戲相關處理、影像與 OCR 等能力；由 Agent 按需呼叫，不負責平台授權或整體任務生命週期。
 
-## 元件內部怎麼分層
+## 元件內部分層
 
 ```text
 Web UI        views / components → stores / composables → api
@@ -36,4 +36,4 @@ Python Worker api → application → domain / infrastructure / games
 - Agent 的 runtime 包含 `api`、`application`、`domain`、`infrastructure`；應用層包含任務 session 與 Worker 更新相關服務。
 - Worker 以 FastAPI 提供路由，並有 `application`、`domain`、`infrastructure` 與 `games` 等目錄；不同遊戲與執行路徑的成熟度不同。
 
-以上是已檢查的目錄與類別責任，並不表示所有功能均已完成或全部遵循同一條呼叫路徑。
+不同遊戲與任務依實作進度使用對應的執行路徑。

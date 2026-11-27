@@ -31,6 +31,6 @@ flowchart TB
 
 **技術：**Vue 3、Java 21、Spring Boot、PostgreSQL、Python、FastAPI、OpenCV、OCR。
 
-## 分層範例
+## 程式分層
 
-[查看元件職責與程式分層示意](architecture-demo.md)
+[查看元件職責與程式分層](architecture-demo.md)
